@@ -1,0 +1,43 @@
+# Exploratory Data Analysis
+Review the structure and content of the data and answer questions such as:
+Are the features (columns) of your data correlated?
+What is the overall distribution of each variable?
+Are there any outliers present?
+What are the relationships between different variables?
+How are categorical variables distributed?
+Do any patterns or trends emerge in the data?
+What is the central tendency and spread of each variable?
+Are there any missing values and how significant are they? 
+
+Our data is comprised of 41188 observations with 20 features + label column "y". Our dependent variable "y" is a binary categorical/factor column with values Y/N. The dataframe consists no missing values.
+
+The classification goal is to predict if the client will subscribe a term deposit (variable y).
+
+
+Drop 'nonexistent' poutcome values.
+
+outliers?
+Month/day field? is this a time series?
+
+# Algorithm Selection
+Select two or more machine learning algorithms presented so far that could be used to train a model
+(no need to train models - I am only looking for your recommendations).
+What are the pros and cons of each algorithm you selected?
+Which algorithm would you recommend, and why?
+Are there labels in your data? Did that impact your choice of algorithm?
+How does your choice of algorithm relates to the dataset?
+Would your choice of algorithm change if there were fewer than 1,000 data records, and why? 
+
+- Logistic regression
+
+# Pre-processing
+Data Cleaning - improve data quality, address missing data, etc.
+Dimensionality Reduction - remove correlated/redundant data than will slow down training
+Feature Engineering - use of business knowledge to create new features
+Sampling Data - using sampling to resize datasets
+Data Transformation - regularization, normalization, handling categorical variables
+Imbalanced Data - reducing the imbalance between classes
+
+- standardization
+- drop columns (day of week, month)
+- one-hot encoding for certain fatures
