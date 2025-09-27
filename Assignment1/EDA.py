@@ -57,7 +57,6 @@ g = sns.catplot(
     data=banks_df.melt(value_vars=categorical_cols), 
     kind='count',
     x='value',
-    hue='y',
     col='variable',
     col_wrap=4, 
     height=4,
@@ -66,7 +65,6 @@ g = sns.catplot(
 )
 
 g.set_xticklabels(rotation=45, ha="right")
-
 plt.show()
 
 

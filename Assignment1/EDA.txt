@@ -1,3 +1,5 @@
+A Portuguese bank conducted a marketing campaign (phone calls) to predict if a client will subscribe to a term deposit. The records of their efforts are available in the form of a dataset. The objective here is to apply machine learning techniques to analyze the dataset and figure out most effective tactics that will help the bank in next campaign to persuade more customers to subscribe to the bank's term deposit.
+
 # Exploratory Data Analysis
 Review the structure and content of the data and answer questions such as:
 Are the features (columns) of your data correlated?
@@ -6,15 +8,62 @@ Are there any outliers present?
 What are the relationships between different variables?
 How are categorical variables distributed?
 Do any patterns or trends emerge in the data?
-What is the central tendency and spread of each variable?
-Are there any missing values and how significant are they? 
+What is the central tendency and spread of each variable? 
+Are there any missing values and how significant are they? X
 
-Our data is comprised of 41188 observations with 20 features + label column "y". Our dependent variable "y" is a binary categorical/factor column with values Y/N. The dataframe consists no missing values.
+Of the four CSV's that were included in the dataset, I compared the files "banks_full.csv" and "banks_additional_full.csv". I discarded the other two CSV's comprised of 10% randomly sampled observations from their corresponsing "full" counterparts, as the randomly sampling method does not specify if steps were taken to ensure that it is a balanced representative subset. Furthermore, the additional datapoints of the full dataset may be useful for working with more complex models and avoiding falling victim to the Curse of Dimensionality. We would be able to generate our own subset from the full dataset if necessary "for working with more computationally demanding machine learning algorithms" as the datasets' author suggests.
+
+For the purposes of this report, I will be refering to "banks_full.csv" as the _original_df_ and "banks_additional_full" as _extended_df_. _original_df_ is comprised of 45211 observations with 16 features + label column "y" for a total of 17 variables, while _extended_df_ is comprised of 41188 observations with 20 features + label column "y", for a total of 21 variables. 
+
+### Differences Between the Two Datasets
+
+A cursory view of the column types and data shows the following differences:
+
+- balance (integer) - the client's bank balance. This field is present in _original_df_ and missing from _extended_df_;
+- emp.var.rate (float) - This field is present  in _extended_df_ and missing from _original_df_
+- cons.price.idx (float) - This field is present in _extended_df_ and missing from _original_df_. 
+- cons.conf.idx (float) - This field is present in _extended_df_ and missing from _original_df_
+- euribor3m (float) - This field is present in _extended_df_ and missing from _original_df_
+- nr.employed (float) - This field is present in _extended_df_ and missing from _original_df_
+
+The latter five fields appear to be engineered features but no additional information is available about what they represent or how they were computed. We will drop these fields as we don't know the methodology that was used to obtain these values. 
+
+_Additional Differences:_
+- education (categorical) - contains different values between the two dfs; values for _extended_df_ to have more specific information ("basic.4y", "basic.6y", "basic.9y", "high.shool", "illiterate", "processional.course", "university.degree", "unknown") while _original_df_ has more general values ("primary", "secondary", "tertiary", "unknown").
+- day vs day_of_week - an additional difference is how contact day was captured. _original_df_ uses an integer value for the day of month (1-31), while _extended_df_ uses a categorical for the day of the week (Mon-Fri)
+- contact - _original_df_ contains 13k unknown contact device (telephone vs. mobile) while _extended_df_ contains none.
+- poutcome - _original_df_ contains over 36k of 45k unknown datapoints for previous campaign outcome while _extended_df_ contains none.
+- pdays - the coding for "never contacted" is different between _original_df_ (999) and _extended_df_ (-1)
+
+A few interesting differences between _original_df_ and _extended_df_ stand out. In particular, `pdays` — the number of days that passed after the client was last contacted from the previous campaign - has a narrow spread (-1 to 27 days) in _extended_df_; and a wider spread in _original_df_ ranging (-1 to 871 days or over 2.38 years), where -1 is a code for never contacted. Similarly `previous` _contacts before this campaign for this client_ has a shorter spread (0-7) in _extended_df_ and a wider spread in _original_df_ (0-58), even after removing the extreme outlier with a value of 275. These differences may be represent differences in the client selection criteria for the former and differences in the lengths of the campaigns themselves for the latter. 
+
+### Examining Categorical Variables
+
+A quick review of our categorical values shows a fairly equal distribution of campaign calls across all `day_of_week` for our _extended_df_. Similarly, the variable `day` (of month) from the _original_df_ doesn't reveal any clear patterns; while see a peak on the 20th of the month, a histogram shows that 'yes' responses to our dependent variable were more evenly distributed. We may consider dropping these parameters, as they may not add much to our model's predictions but cost an additional degree of freedom. 
+
+### Examining Non-Categorical Variables
+
+_Outliers_
+Examining boxplots for our non-categorical variables suggests the pressence of outliers for all variables, whereby many observations fall beyond the upper whiskers. These outliers are confirmed in out pairplots. For example, `duration` appears to have a somewhat large outlier of 4918 seconds of last contact (1 hour, 22 mins) while the upper whiskers .  Given the number of observations in each dataset (> 40k), we could consider dropping extreme outliers. In particular, the `_original_df_.previous` contains a max datapoint with a value of 275 _contacts performed before this campaign and for this client_ while the next highest observation has a value of 58; the large difference could be the results of erronous data entry for this observation. 
+
+Performing a log transformaton on the data may help minimize the effects of these outliers, particularly for variables such as `balance` with a a wide spread of .
+
+The median and IQR for `age` are similar between the yes/no values of our dependent variable in both dataframes suggesting that age may be a weak predictor as there is little variability from one or the other. Similarly, the IQFs for `campaign` - number of contacts performed during this campaign and for this client - are also very similar; while there is some variation in _extended_df_, there the IQRs and upper whiskers for _original_df_ are very similar between our dependent variable. The  similarities in spread and distribution are closely matched `pdays` - number of days that passed by after the client was last contacted from a previous campaign  - in _extended_df_, where as the the upper IQR is very pronounced in _original_df_.
+
+
+
+
+Performing a Pairwise Correlation test, all variables have weak correlations each other. This suggests that the parameters do not have multicolinearity.
+
+Our dependent variable "y" is a binary categorical/factor column with values Y/N. Neither dataframe contains any missing values.  
+
 
 The classification goal is to predict if the client will subscribe a term deposit (variable y).
 
 
 Drop 'nonexistent' poutcome values.
+
+The datasets author cautions about using `duration` for predictive purposes as "this attribue highle affects the output target." As such, we will discard this field. 
 
 outliers?
 Month/day field? is this a time series?
@@ -38,6 +87,11 @@ Sampling Data - using sampling to resize datasets
 Data Transformation - regularization, normalization, handling categorical variables
 Imbalanced Data - reducing the imbalance between classes
 
+- drop outliers (previous on original_df)
+
 - standardization
-- drop columns (day of week, month)
-- one-hot encoding for certain fatures
+- drop columns:
+-- day of week
+-- duation
+
+- one-hot encoding for certain features
