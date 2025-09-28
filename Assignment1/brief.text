@@ -1,0 +1,11 @@
+A Portuguese bank conducted a marketing campaign (phone calls) to predict if a client will subscribe to a term deposit. The records of their efforts are available in the form of a dataset. The objective here is to apply machine learning techniques to analyze the dataset and figure out most effective tactics that will help the bank in next campaign to persuade more customers to subscribe to the bank's term deposit.
+
+# Exploratory Data Analysis
+Are the features (columns) of your data correlated?
+X What is the overall distribution of each variable?
+X Are there any outliers present?
+What are the relationships between different variables?
+X How are categorical variables distributed?
+Do any patterns or trends emerge in the data?
+X What is the central tendency and spread of each variable? 
+X Are there any missing values and how significant are they? 
