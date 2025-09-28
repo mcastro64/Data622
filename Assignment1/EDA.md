@@ -1,3 +1,7 @@
+# DATA622 - Assignment 1
+_Marco Castro_
+
+## Exaploratory Data Analysis
 
 Of the four CSV's that were included in the dataset, I compared the files "banks_full.csv" and "banks_additional_full.csv". I discarded the other two CSV's comprised of 10% randomly sampled observations from their corresponsing "full" counterparts, as the randomly sampling method does not specify if steps were taken to ensure that it is a balanced representative subset. Furthermore, the additional data points of the full dataset may be useful for working with more complex models and avoiding falling victim to the _Curse of Dimensionality_. We would be able to generate our own subset sampled from the full dataset if necessary "for working with more computationally demanding machine learning algorithms" as the datasets' author suggests.
 
@@ -16,7 +20,7 @@ A cursory view of the column types and data shows the following differences:
 
 The latter five fields appear to be engineered features but no additional information is available about what they represent or how they were computed. We will drop these fields as we don't know the methodology that was used to obtain these values. 
 
-_Categorical Variable Comparison_
+#### Categorical Variable Comparison
 
 Distributions in our categorical variables appear somewhat similar but with the following differences:
 
@@ -30,7 +34,7 @@ Distributions in our categorical variables appear somewhat similar but with the 
 * housing - _extended_df_ contains values classified as `unknown` while _original_df_ contains none.
 * loan - _extended_df_ contains values classified as `unknown` while _original_df_ contains none.
 
-_Non-categorical Variable Comparison_
+#### Non-categorical Variable Comparison
 
 The crentral tendency, Inter-Quartile Range (IQR) and spread of our non-categorical variables are similar between _original_df_ and _extended_df_. In particular:
 
@@ -41,7 +45,8 @@ The crentral tendency, Inter-Quartile Range (IQR) and spread of our non-categori
 * previous - the quartile values are the same for both datasets (0/0/0) but the maximums differ (275 vs 7). Note that the huge difference in ranges could be attributed to binning if these _extended_df_ is derived from _original_df_
 * balance - In _orginal_df_, the mean balance is 1362.27, with minimum value of -8019 and a maximum value of 102127. This gives us a right-skewed distribution with a heavy large tail representing clients with large balances and suggests that using this variable in our model will produce poor model fit as it may be overly sensitive to our outliers with high leverage and influence. Note this field is not present in _extended_df_.
 
-_Additional Differences_
+#### Additional Differences
+
 A few interesting differences between _original_df_ and _extended_df_ stand out. In particular, `pdays` —- the number of days that passed after the client was last contacted from the previous campaign -- has a narrow spread (-1 to 27 days) in _extended_df_ and a wider spread in _original_df_ ranging (-1 to 871 days or over 2.38 years), where -1 is a code for never contacted. Similarly `previous` _contacts before this campaign for this client_ has a shorter spread (0-7) in _extended_df_ and a intial _original_df_ spread of 0-275 adjusted to 0-58 if we remove a single extreme outlier at 275. These differences may be represent differences in the client selection criteria for the former and differences in the lengths of the campaigns themselves for the latter. 
  
 The author makes reference to the _original_df_ as an older dataframe. While at first glance, it  was not clear if _extended_df_ was generated from _original_df_ after data-engineering, there are sufficient differences in the data to suggest that they contain data points from different campaigns. For example, many of the categorical variables include `unknown` answers in _extended_df_ where there were no unknown answers in their corresponding _original_df_ fields. Furthermore, the spread of the number of last contacted days is significantly shorter, suggesting that campaigns were potentially tracked more frequently. 
@@ -66,19 +71,21 @@ There is also a fairly equal distribution of campaign calls across all `day_of_w
 
 ### Examining Non-Categorical Variables
 
-Visualizing pairplots for our non-categorical variables reveals some patterns in our data. First, many of our plots show a reverse funnel shape suggesting that our data is very linear. This is due to the large number of clients (39,673) flagged as "not previously contacted" (`pdays` with a value of -1). All pairplots plotted against `pdays` show a clear band of overvations at y = -1. We may need to create a feature flag for "not previously contacted" to avoid introducing heteroscedasticity into our models. Interestingly, 9.3% of observations flagged as "not previously contacted" responded yes to the bank's term deposit. This may be due to data entry errors or may be a result of users signing up for the service on their own, such as through a bank branch. We would need to verify if these observations are true "yes" responses to better understand their relevance.
+Visualizing pairplots for our non-categorical variables reveals some patterns in our data. First, our date is right-skewed and is not normally distributed. Further, many of our plots show a reverse funnel shape suggesting that our data is very linear. This is due to the large number of clients (39,673) flagged as "not previously contacted" (`pdays` with a value of -1). All pairplots plotted against `pdays` show a clear band of overvations at y = -1. We may need to create a feature flag for "not previously contacted" to avoid introducing heteroscedasticity into our models. Interestingly, 9.3% of observations flagged as "not previously contacted" responded yes to the bank's term deposit. This may be due to data entry errors or may be a result of users signing up for the service on their own, such as through a bank branch. We would need to verify if these observations are true "yes" responses to better understand their relevance.
 
 The funnel shape is particularly obvious in the `duration` vs `campaign` and `previous` vs `campaign` where data has a wider spread along the x-axis as y approches zero which narrows to a point as x approaches 0 when y increases. Visualizing the yes vs no responses shows a band of "no" responses at or near x = 0 for both variables. This conceptually makes sense, as calls with a duration of 0 seconds (didn't pick up) can't have a positive outcome; furthermore, short calls (some seconds) are not likely to produce a positive outcome. The dataset's author recommends ommitting this variabled from our model. Similarly, clients that were never contacted previously and not yet contacted cannot respond 'yes' to the bank term deposit.
 
 The funnel is less defined for `age` vs `campaign` as obsevartions are more spread out. However, the plot shows a greater number of contacts performed during this campaign for working-age adults (24-59). This might be because calls made during traditional office hours may be less likely to be answered by people whose work schedules match those hours. Most of the "yes" observations to our dependent variable are clustered when y is less than 10 suggesting that continous calls may be ineffective for clients that are less likely to answer. 
 
-_Outliers_
+#### Outliers
+
 Examining boxplots for our non-categorical variables suggests the pressence of outliers for all variables, whereby many observations fall beyond the upper whiskers. These outliers are confirmed in out pairplots. For example, `duration` appears to have a somewhat large outlier of 4918 seconds of last contact (1 hour, 22 mins) while the "upper whiskers" from our IQR is 643. Performing a log transformaton on the data may help minimize the effects of these outliers.
 
 The median and IQR for `age` are similar between the yes/no values of our dependent variable in both dataframes suggesting that age may be a weak predictor as there is little variability from one or the other. Similarly, the IQFs for `campaign` - number of contacts performed during this campaign and for this client - are also very similar; while there is some variation in _extended_df_, there the IQRs and upper whiskers for _original_df_ are very similar between our dependent variable. The  similarities in spread and distribution are closely matched `pdays` -- number of days that passed by after the client was last contacted from a previous campaign  -- in _extended_df_, where as the the upper IQR is very pronounced in _original_df_.
 
 
-_Correlation_
+#### Correlation
+
 Performing a Pairwise Correlation test shows that while most non-categorical variables weak correlation to each other, some variables have strong correlation values suggesting the pressence of multicolinearity. Including highly correlated variables could create unstable coefficients, inflate standard errors, and could overly complicate our models. The list below shows the 20 pairings with the highest correlation values. Here we see that `housing_unknown` vs `loan_unknown` have perfect correlation. A few other noteworthy pairings include `previous` and `poutcome_nonexistent`, `pdays` vs `poutcome_success`, `marital_single` vs `marital_married`, which have a correlation value of over +/-0.6, our rule of thumb threshold for identifying high correlation values and should consider dropping one of these variables from our model to avoid introducing multicollienarity. We would need to gather subject expertise further to get a better understanding of the true threshold.  Variance Inflation Factor (VIF) test results suggest we should consider `age` (VIF: 17.4) along with `housing_unknown/loan_unknown`, `poutcome_nonexistent`, and `marital_married` as we previously found. 
 
 | col                  | variable             | corr      |
@@ -105,35 +112,37 @@ Performing a Pairwise Correlation test shows that while most non-categorical var
 | job_services         | education_secondary  | 0.266532  |
 
 
-# Algorithm Selection
+---
 
-Of the methods introduced so far, Decision Trees, K-Nearest Neighbors (KNN), and Quadratic Discriminat Analysis (QDA) appear to be the best fit for our dataset. While initially I considered logistic regression and LDA, data exploration revealed that our data is not very linear, making either algorithms unsuitable for analysis given that we would violate the linearity assumptions inherent in theses algorithms. By contrast Decision Trees, KNN, and QDA does not make these assumptions.
+## Algorithm Selection
 
-What are the pros and cons of each algorithm you selected?
+The Bank data for this analysis is labeled given that the dependent variable `y` is a binary categorical variable with values "Yes" and "No". The pressence of labels means that we can use supervised machine learning algorithms that have been introduced so far in the semester, including Logistic Regress, Decision Trees, k-NN, LDA/QDA, and Naive Bayes. If the data was not labeled, we would select from unsupervised machine learning algorithms such as k-Means clustering and PCA.
 
-K-nearest neight is a lazy-learner. Assumptions are relaxed, but data hungry and computationally expensive. Does not need labels
+Of the machine learning algorithms that we have been introduced to, Decision Trees, K-Nearest Neighbors (k-NN), and Quadratic Discriminat Analysis (QDA) appear to be the best fit for our dataset. While initially I considered logistic regression given and LDA, data exploration revealed that our data is not linear, making neither algorithm suitable for our scenrio given that we would violate the linearity assumptions inherent in theses algorithms. By contrast, Decision Trees, k-NN, and QDA does not make these assumptions.
 
-Tree
+### Algorithms Comparison
 
+#### Decision Tree
 
-Which algorithm would you recommend, and why?
-
-
-Ultimately, it would be preferable to test the performance of all three algorithm before selecting a single one.
-
-Are there labels in your data? Did that impact your choice of algorithm?
-
-Yes, we have a labels for our data in the dependent variable `y`. `Y` is a binary categorical variable with values "Yes" and "No". 
-
-My choice of algorithm relates to the dataset?
+A Decision Tree is non-parametric algorithm that splits at nodes based on feature values that create a tree-like structure. As a non-parametric method, Decions Trees don't make assumptions about the distribution of our data. Therefore, it is suitable for data that does not follow any specific pattern such as normal distribution. Decision Trees work well with mixed data (categorical and numerical) while being relatively computationally efficient on large datasets such as ours. Another advantage is in the ease of interpretation which can be good for communicating with stakeholders and decision makers when designing a future campaign. Additionally, data does not necessarily need to be normalized and imbalanced data is less of a concern, though implementing Class Weighting can help the model performance. A major disadvantage is that Decision Trees can be prone to overfitting. Decision Trees can also become unstable if there are too few records. Therefore, we should implement pruning in order to prevent overfitting or attempt an ensemble method such as Random Forest when working with this algorithm.  
 
 
-Would your choice of algorithm change if there were fewer than 1,000 data records, and why? 
+#### k-Nearest Neighbors
+
+k-Nearest Neighbors (k-NN) is non-parametric algorithm that can model complex boundaries well. Since the algorithm needs to compute each distance between data points, k-NN is computationally expensive. The algorithm may take some time to calculate all 40k+ observartions in our dataset. Like a Decision Tree, k-NNs are easy to interpret. However, they can be more sensitive to irrelevant features as well as data using different scales. They are negatively impacted by imbalanced data. Therefore, we would need to standardize our data, implement dimensionality reduction and address imbalanced data before modeling when working with this algorithm.
+
+#### QDA
+
+Quadratic Discriminant Analysis (QDA) is a parametric algorithm that assumes that observations within each class are drawn from a multivariate Guassian distribution. QDA assumes that each class has its own coveriance vectors. A major advantage of using QDA is that it outputs probabilities not just labels. While QDA is effective on Gaussian distributions, it may perform poorly with our dataset where many of the features do not have normal distributions. One-hot encoding of our categorical variables can inflate the overall dimensions in our model. This can make coveriance matrixes large and require a large enough dataset to avoid become noisy and computationally unstable or even impossible to compute. They can also be sensitive to outliers and different scales and are negatively impacted by imbalanced data. Therefore, we will need to address outliers, standardize our data, address imbalanced data before modeling when working with this algorithm.
+
+#### Recommended Algorithm 
+
+While it would be preferable to test the performance of all three algorithm before selecting one, I am selecting the Decision Tree algorithm to start my analysis given the size of our dataset (41k), the fact that it mixes categorical and numerical variables, and that our numeric parameters are non-linear or normally distributed. Decision Trees may perform best for our particular dataset and features. Decision Trees should be able to handle the number of records relatively efficiently, work well with mixed data even without one-hot encoding, and don't require linear data. By contrast KNN may be computationally expensive for a dataframe of our size. Both KNN and QDA may perform poorly, given the number of categorical variables that need to be one-hot encoded that would inflate the number of dimensions in our dataframe. QDA also assumes that our data is normally distributed. However, pruning correctly will be critical to avoid overfitting our data. Alternatively, we could use an Ensemble Tree improve our model's performance.
+
+Decision Trees would still be an effective choice for our dataset even had less than 1,000 observations due to the number of features in our dataset. While k-NN would be able to process the smaller dataset better than the larger one, it may still struggle to perform well since it requires one-hot encoding our categorical varibles. This increases the number of dimensions that the alogorithm needs to work with, which results in added noise and may make if difficult to compute the distances between points at high dimensions. We would need to implement dimensionality recudction to improve outputs. QDA would continue to suffer from the aforementioned issues, given that representational sample of our data would violate its normality assuption.
 
 
-
-
-- Logistic regression
+---
 
 ## Pre-processing
 
