@@ -18,7 +18,7 @@ A cursory view of the column types and data shows the following differences:
 * euribor3m (float) - This field is present in _extended_df_ and missing from _original_df_
 * nr.employed (float) - This field is present in _extended_df_ and missing from _original_df_
 
-The latter five fields appear to be engineered features but no additional information is available about what they represent or how they were computed. We will drop these fields as we don't know the methodology that was used to obtain these values. 
+The latter five fields appear to be engineered features but no additional information is available about what they represent or how they were computed. We will drop these fields as we don't know the methodology that was used to generate or obtain these values. 
 
 #### Categorical Variable Comparison
 
