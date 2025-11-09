@@ -1,4 +1,4 @@
-# DATA622 - Assignment 1
+# DATA622 - Assignment 2
 _Marco Castro_
 
 ## Experimentation & Model Training
