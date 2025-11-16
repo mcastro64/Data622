@@ -84,12 +84,13 @@ When evaluating with our test dataset, model `svm2_pipe` had the best accuracy (
 | Ada Base | 0.888565 | 0.346983 | 0.412292 | 0.753653 | 0.383261 |
 | Ada 1 | **0.891317** | 0.304598 | 0.387038 | **0.763200** | 0.389658 |
 | Ada 2 | 0.890669 | 0.317529 | 0.395526 | 0.762900 | **0.393265** |
-| Ada 3* | 0.879501 | 0.407328 | 0.432329 | 0.754521 | 0.383991 |
-*Previously selected as best model
+| Ada 3\* | 0.879501 | 0.407328 | 0.432329 | 0.754521 | 0.383991 |
+
+\*Previously selected as best model
 
 ### Section 3: Model Comparison
 
-All three SVM models performed well across the various performance metrics when compared to all previous models, as seen in Table 1. `DT3` had the highest recall, but was one of the worst performing models across all other metrics along with `DT Base`. All Decision Tree (`DTx`) and all Random Forest models (`RFx`) were generally outperformed by the SVM and AdaBosst models.  While `SVM 2` stood out with the highest F1 score and competitive scores for all other metrics, it was edged out to `Ada 1` for AUC and Accuracy and `Ada 2` for AUPRC. However, the three SVM models performed better than the AdaBoost models for Recall with scores ranging from 0.478 to 0.577 vs 0.305 to 0.407.  
+All three SVM models performed well across the various performance metrics when compared to all previous models, as seen in Table 1. `DT3` had the highest recall, but was one of the worst performing models across all other metrics along with `DT Base`. All Decision Tree (`DTx`) and all Random Forest models (`RFx`) were generally outperformed by the SVM and AdaBosst models. While `SVM 2` stood out with the highest F1 score and competitive scores for all other metrics, it was edged out to `Ada 1` for AUC and Accuracy and `Ada 2` for AUPRC. However, the three SVM models performed better than the AdaBoost models for Recall with scores ranging from 0.478 to 0.577 vs 0.305 to 0.407.
 
 If we were to follow the examples from the literature, we should put greater emphasis on F1 score, AUC, and AUPRC. If this is the case, our best model may lie between `SVM 2`, `Ada 1` and `Ada 2`. However, given that the goal of our analysis is to predict if a client will subscribe to bank term deposit, we could prioritize Recall, as every additional "yes" outcome translates to an additional client subscription leading to profits for the bank, while misidentifying a "no" outcome has a comparatively low cost. Our performance metrics thus suggest that `SVM 1` may have a fairly high success rate for predicting positive outcome. Finally, though `SVM 2` may slightly under-predict positive outcomes, it may produce predictions that better balance costs and benefits.
 

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>mc-assignment3-report</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="MC-Assignment3-Report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="MC-Assignment3-Report_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="MC-Assignment3-Report_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="MC-Assignment3-Report_files/libs/quarto-html/popper.min.js"></script>
+<script src="MC-Assignment3-Report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="MC-Assignment3-Report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="MC-Assignment3-Report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="MC-Assignment3-Report_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="MC-Assignment3-Report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="MC-Assignment3-Report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="MC-Assignment3-Report_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="data622---assignment-3" class="level1">
+<h1>DATA622 - Assignment 3</h1>
+<p><em>Marco Castro</em></p>
+<section id="support-vector-machines" class="level2">
+<h2 class="anchored" data-anchor-id="support-vector-machines">Support Vector Machines</h2>
+<section id="introduction" class="level3">
+<h3 class="anchored" data-anchor-id="introduction">Introduction</h3>
+<p>This assignment extends Assignment 2 by incorporating Support Vector Machine (SVM) models to analyze our Portuguese bank marketing dataset. I will review literature comparing the SVM against Decision Tree-based models in an area of interest to gain a greater understanding of how these algorithms are typically implemented. I will then train SVM models and compare their results against the results of the previous Decision Trees, Random Forest, and Adaptive Boosting (AdaBoost) from Assignment 2 and use insights from the literature review to help determine which model might be most suitable to help predict if a client will subscribe to bank term deposit through a marketing campaign.</p>
+</section>
+<section id="area-of-interest" class="level3">
+<h3 class="anchored" data-anchor-id="area-of-interest">Area of Interest</h3>
+<p>My area of expertise is in the domain of housing security, including homelessness intervention/prevention and housing affordability. In particular, I hope to understand how machine learning (ML) can be used to mitigate homelessness by using widely available datasets such as the Homeless Management Information System (HMIS), US Census, and Bureau of Labor Statistics (BLS) data to identify key markers of individuals at-risk of becoming homeless so as to deploy preventative interventions. A secondary goal would be increase the efficiency of service delivery so address funding gaps and capacity constraints.</p>
+<p>A preliminary search for “Homelessness” + “SVM” + “Decision Tree” and “Homelessness” + “Machine Learning” and related terms (i.e.&nbsp;displacement, housing insecurity) yielded few relevant results; while some articles included the correct keywords in tables or their respective literature reviews, much of the body of work focused on implementation or policy recommendations and did not present a detailed discussion on SVM or Decision Tree-based algorithms. Some studies relied primarily on logistic regression or discussed one of the two algorithms of interest; other studies used SVM or Decision-Trees as part of an ensemble model or custom model. Finally, Showkat et al.&nbsp;(2023) conducted a critical analysis of 40 research studies on ML in homeless service provision. While their paper analyzed which themes other studies prioritized (i.e.&nbsp;novel ML approaches, program performance and service limitations) and which themes were de-prioritized (i.e.&nbsp;human-centered approaches), it’s worth noting that they faced similar challenges in terms of a) the volume of work and b) the specific algorithms that previous work discussed. This suggests that SVMs are seldomly used in this domain, perhaps because these models are less interpretable than less complex models such as Decision Trees or Linear Regression.</p>
+<p>Given the lack of viable results in my preliminary search, I expanded my definition to include proxies for housing insecurity, including social determinants (poor health or substance abuse: Tabar et al.&nbsp;2020), migration (Liyanage, 2023) bad credit (Doko, 2021), and loan defaults. The literature review that follows focuses on the topic “loan defaults” under the premise that a person unable to pay back debt may be at higher risk of loosing their housing others. While this topic is somewhat removed from the original goal, it is an attempt to understand if methods used for related sectors can inform future work. In other words: can this information be leveraged to develop ML methods for identifying individuals that have defaulted on housing loans to help folks stay in their homes as a way to address one facet of the housing and homelessness crisis?</p>
+</section>
+<section id="literature-review" class="level3">
+<h3 class="anchored" data-anchor-id="literature-review">Literature Review</h3>
+<p>To ground my understanding of Decision Trees and SVMs, I reviewed <a href="https://onlinelibrary.wiley.com/action/showCitFormats?doi=10.1155%2F2021%2F5550344">Ahmad et al.&nbsp;(2021)</a> and <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8137961/">Guhathakurata et al.&nbsp;(2021)</a>, two studies that used Machine Learning to predict COVID-19 infections.</p>
+<p>For their study, Ahmad et al.&nbsp;evaluated various Decision Tree and ensembles including Random Forests, Boosted ensembles and Bagging, with additional focus on techniques to address class imbalance. They found that Random Undersampling (RUS)–based Balanced Random Forests outperformed models trained with SMOTE, likely because synthetic over-sampling introduced noise. RUSBoost models, however, performed poorly. Given the data’s high class imbalance, the authors found that “Accuracy” was inadequate for measuring model performance and favored F-measure, precision, recall, AUROC (Area Under the Receiver Operating Characteristic Curve), and AUPRC (Area Under the Precision-Recall Curve). Recall, F1 score and AUPRC were deemed to be the best performance metrics once the data was balanced with RUS, with AUPRC also edging out AUROC for imbalanced data.</p>
+<p>While Ahmad did not work with SVMs, Guhathakurata et al.&nbsp;placed special interest on SVMs’ ability to use kernels to make non-linear problems separable by transforming low-dimensional data to higher-dimensional space. Using three classes, their best SVM model achieved an overall accuracy of 87%, with perfect recall for severely infected cases, suggesting strong sensitivity for the most critical class. Performance was moderate for mildly or non-infected cases likely due to data imbalance, as confirmed by F1-scores reflected. When compared against K-nearest neighbors (KNN), Naïve Bayes, AdaBoost, Random Forest and DT across metrics including ROC, accuracy, precision, recall, and F1-score, SVM consistently outperformed all other models.</p>
+<p>Turning to the literature for my area of interest, I reviewed three works on loan defaults ([Ali et al.&nbsp;(2021)(https://www.ijiemjournal.uns.ac.rs/images/journal/volume12/IJIEM_272.pdf), <a href="https://www.sciencedirect.com/science/article/abs/pii/S0377221720306846">Chen et al.(2021)</a>, and [Krasovytskyi and Stavyskyy (2024)](https://www.journals.vu.lt/ekonomika/article/download/34809/34141])) and a complimentary article on credit risk <a href="https://www.mdpi.com/1911-8074/14/3/138">Doko et al.&nbsp;(2021)</a>.</p>
+<p>Azhar et al.&nbsp;evaluated 19 machine learning models, including multiple SVMs, decision trees, homogeneous ensemble classifiers and neural networks. Artificial neural networks (ANNs) achieved the highest overall prediction accuracy (97%) on the test dataset, while Boosted (21%) and RUSBoost Trees (18%). This is consistent with Ahmad’s findings that found RUSBoosted performed weakly. Among SVMs, the coarse Gaussian kernel performed best (89% accuracy), followed by medium Gaussian (87%), cubic (84%), and fine Gaussian (82%), matching Bagged Trees (82%) and outperforming fine, medium, and coarse decision tree variants which had accuracy scores of 78%, 61% and 74% respectively. The researchers also evaluated for prediction speed, where RUSBoost and Boosted Trees were able to predict the highest number of observations per second though with poor predictive performance. It should be noted that while ANN’s were the third fastest model, making it the best model when looking at speed and accuracy. The decision tree models exhibited faster prediction speed over SVMs, making them a suitable candidate if speed and interpretability are important.</p>
+<p>Chen compared a range of machine learning and statistical models using AUC, H-measure, and Brier Score to evaluate classification performance. Results showed that heterogeneous ensemble methods consistently performed best, followed by neural networks, XGBoost, generalized additive models (GAM), and advanced logistic models (GLM2 and GLM3). In contrast, AdaBoost and KNN under-performed, even when compared to the simplest model (GLM1). SVM ranked in the middle of the group. Despite performance declines across all models when using out-of-time testing, the heterogeneous ensembles remained leaders in AUC, while GLM2, GLM3, GAM, and stacked models led in H-measure. Random Forest, AdaBoost, SVM, and KNN consistently lagged behind. This suggests that the complexity of a model is not necessarily associated with its performance and that a simpler statistical models may be suitable for risk classification tasks.</p>
+<p>In their study Krsovytskyi and Stavyskyy compared several classification algorithms, including Logit, LDA, SVM, Random Forest, CART, neural networks, and XGBoost but did not include DTs due to performance issues. To combat data imbalance, the authors tested two techniques: weighting and SMOTE. RUS was not tested. When evaluating with AUROC, SVM and LDA performed the worst on the weighted dataset with a prediction power close to random selection (0.5); their performance improved somewhat after when using SMOTE. Random Forest and XGBoost achieved the best results, with XGBoost outperforming others overall.</p>
+<p>Krsovytskyi and Stavyskyy build off of work by Dokos work on credit risk assessment. Doko’s study compared DTs, Random Forests, SVMs, neural networks, Logistic Regression (LR) models. As the data was imbalanced, Doko tested feature scaling and SMOTE. With feature scaling, Decision Trees performed best, followed by Random Forest, LR, SVM, and neural networks; without scaling, model performance declined overall. Applying SMOTE unexpectedly worsened performance, likely due to overfitting from synthetic samples. This point is similar to findings by Ahmad where SMOTE introduced noise and did not perform as well as RUS.</p>
+<p>Several points stood out when reviewing these studies to consider while continuing this project. In particular: * Accuracy is generally unreliable for imbalanced datasets. Alternative metrics such as F1 score, recall, AUROC, and AUPRC provide a more informative assessment of model performance. In our marketing context, where the cost of a “yes” response may outweigh that of a “no,” recall may remain the preferred metric despite the prevailing preference of F1 score in the studies. * SMOTE can potentially introduce noise due to its synthetic sample generation. RUS may achieve less noisy outcomes but at the expense of potentially valuable datapoints. Thus SMOTE may still be preferable for smaller datasets or in cases with severe data imbalance, as undersampling to a minority class with few data points could weaken our predictors. * SVM performance is context-dependent. It was the top-performing model for COVID-19 detection (Guhathakurata, 2021) but showed inconsistent results in loan default prediction: among the worst performers in Krsovytskyi and Stavyskyy (2024), mid-range in Chen (2021), and strong but behind ANN and KNN in Azhar et al., indicating that domain or data characteristics may strongly influence outcomes.</p>
+</section>
+<section id="svm-modeling" class="level3">
+<h3 class="anchored" data-anchor-id="svm-modeling">SVM Modeling</h3>
+<p>A Support Vector Machine (SVM) is a supervised learning algorithm that finds an optimal “hyperplane” to separate classes. By using kernel functions, SVM can transform nonlinearly separable data into higher-dimensional spaces to enable linear separation.</p>
+<section id="preprocessing-and-data-balancing" class="level4">
+<h4 class="anchored" data-anchor-id="preprocessing-and-data-balancing">Preprocessing and Data Balancing</h4>
+<p>The SVM models will use a pipeline for preprocessing, including imputation and one-hot encoding of categorical variables like our Random Forest and AdaBoost pipelines. Numerical values also be standardized in the pipeline for SVM to work properly. Since the minority class <code>yes</code> makes up only 11% of our data, I will have selected SMOTE over RUS as a data balancing method in order to prevent loosing valuable data points and insights that might influence our predictions.</p>
+</section>
+<section id="model-building" class="level4">
+<h4 class="anchored" data-anchor-id="model-building">Model Building</h4>
+<p>I began by building a baseline model (svm0_pipe) using the arbitrary values for penalty cost (C=0.1) and gamma=‘scale’. When using scale for gamma, it is automatically calculated to balance the effects of each feature. I chose ‘RBF’ as the kernel as EDA from Assignment 1 indicated that our data is not linear.</p>
+<section id="is-rbf-a-good-kernel" class="level5">
+<h5 class="anchored" data-anchor-id="is-rbf-a-good-kernel">Is ‘RBF’ a good kernel?</h5>
+<p>To confirm that this was the case, I used the dimensionality reduction technique Principal Component Analysis (PCA) to visualize the data in 2 dimensions. However, Figure 1 shows visible banding as a results of the one-hot encoding of the categorical variables. A scatter-plot of t-SNE (Figure 2) – which can work with a mix of numerical and categorical variables – suggests that our data may be better suited for a ‘RBF’ kernel over a ‘linear’ kernel.</p>
+<p>To test if RBF is correct and to fine tune our C and gamma hyper-parameter, I used 5-fold Cross-Validation to test ‘RBF’, ‘poly’ and ‘linear’ kernels, C values of 0.1, 1, and 10, and gamma values of ‘scale’, 0.1, 0.01. Table 1 shows the mean Accuracy, Recall, and F1-score for the 12 model variants. As the test dataset is very likely imbalanced and the literature indicated that accuracy was not an adequate metric for imbalanced data, I will focus on F1 Score and Recall. Figure 1 and 2 show line plots for F1 Score and Recall by C and gamma for mean F1 Score and Recall respectively.</p>
+<p>Cross-validation confirms that using a linear kernel does not perform as strongly as our best ‘RBF’ models and shows little difference between C and gamma values. Surprisingly, using a linear kernel does not yield the worst performing model for either evaluation metric. The best Recall (57.97% using our training data) score was yielded when using the hyper-parameters kernel=‘rbf’, C=0.1, and gamma=0.01, while the best F1 Score (43.4% using our training data) came from hyper-parameters kernel=‘rbf’, C=10, and gamma=0.01. Models <code>svm1_pipe</code> and <code>svm2_pipe</code> reflect these values respectively.</p>
+</section>
+<section id="can-recall-be-improved-by-feature-selection" class="level5">
+<h5 class="anchored" data-anchor-id="can-recall-be-improved-by-feature-selection">Can Recall be improved by feature selection?</h5>
+<p>Given that the current models yield moderate Recall (57.97%) and F1 Score (43.4%), I wanted to explore if reducing model complexity through feature selection would mitigate possible noise introduced by SMOTE. First, I used the function permutation_importance to score each of my model’s features. Table 2 shows a ranking of these features from most important to least. Next I filtered out any feature with an importance mean less than 0.005. This reduced the number of features from 40 to 14. I trained a new model (<code>svm3_pipe</code>) using the smaller feature set and performed Cross-Validation to tune the hyper-parameters as before. Model <code>svm3_pipe</code> uses an RBF kernel, C=0.1, and gamma=0.01 and yielded a Recall of 56.53% and an F1 score of 33.02% on our training data.</p>
+</section>
+<section id="perfomance-on-test-data" class="level5">
+<h5 class="anchored" data-anchor-id="perfomance-on-test-data">Perfomance on Test Data</h5>
+<p>When evaluating with our test dataset, model <code>svm2_pipe</code> had the best accuracy (0.859) and F1 Score (0.456). However, model <code>svm1_pipe</code> had the best Recall value of 0.576868. Table 1 (below) shows the values of the evaluation metrics for the three SVM models along with the values for all models from Assignment 2.</p>
+<p><strong>Table 1: Comparison of All Models</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model Name</th>
+<th>Accuracy</th>
+<th>Recall (Yes)</th>
+<th>F1 (Yes)</th>
+<th>AUC</th>
+<th>AUPRC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>SVM 1</td>
+<td>0.804726</td>
+<td>0.576868</td>
+<td>0.399602</td>
+<td>0.760356</td>
+<td>0.380418</td>
+</tr>
+<tr class="even">
+<td>SVM 2</td>
+<td>0.858784</td>
+<td>0.525862</td>
+<td><strong>0.456217</strong></td>
+<td>0.762382</td>
+<td>0.384800</td>
+</tr>
+<tr class="odd">
+<td>SVM 3</td>
+<td>0.819859</td>
+<td>0.478448</td>
+<td>0.374368</td>
+<td>0.721687</td>
+<td>0.326938</td>
+</tr>
+<tr class="even">
+<td>————-</td>
+<td>———–</td>
+<td>—————</td>
+<td>———–</td>
+<td>——–</td>
+<td>——–</td>
+</tr>
+<tr class="odd">
+<td>DT Base</td>
+<td>0.830460</td>
+<td>0.312500</td>
+<td>0.293423</td>
+<td>0.605826</td>
+<td>0.174159</td>
+</tr>
+<tr class="even">
+<td>DT 1</td>
+<td>0.848345</td>
+<td>0.504310</td>
+<td>0.428310</td>
+<td>0.752236</td>
+<td>0.348789</td>
+</tr>
+<tr class="odd">
+<td>DT 2</td>
+<td>0.859675</td>
+<td>0.466236</td>
+<td>0.428100</td>
+<td>0.727157</td>
+<td>0.333665</td>
+</tr>
+<tr class="even">
+<td>DT 3</td>
+<td>0.528688</td>
+<td><strong>0.778017</strong></td>
+<td>0.271089</td>
+<td>0.680707</td>
+<td>0.240591</td>
+</tr>
+<tr class="odd">
+<td>————-</td>
+<td>———–</td>
+<td>—————</td>
+<td>———–</td>
+<td>——–</td>
+<td>——–</td>
+</tr>
+<tr class="even">
+<td>RF Base</td>
+<td>0.863235</td>
+<td>0.368534</td>
+<td>0.377761</td>
+<td>0.735150</td>
+<td>0.310198</td>
+</tr>
+<tr class="odd">
+<td>RF 1</td>
+<td>0.869629</td>
+<td>0.290948</td>
+<td>0.334572</td>
+<td>0.727504</td>
+<td>0.309402</td>
+</tr>
+<tr class="even">
+<td>RF 2</td>
+<td>0.871409</td>
+<td>0.308908</td>
+<td>0.351164</td>
+<td>0.732431</td>
+<td>0.314691</td>
+</tr>
+<tr class="odd">
+<td>————-</td>
+<td>———–</td>
+<td>—————</td>
+<td>———–</td>
+<td>——–</td>
+<td>——–</td>
+</tr>
+<tr class="even">
+<td>Ada Base</td>
+<td>0.888565</td>
+<td>0.346983</td>
+<td>0.412292</td>
+<td>0.753653</td>
+<td>0.383261</td>
+</tr>
+<tr class="odd">
+<td>Ada 1</td>
+<td><strong>0.891317</strong></td>
+<td>0.304598</td>
+<td>0.387038</td>
+<td><strong>0.763200</strong></td>
+<td>0.389658</td>
+</tr>
+<tr class="even">
+<td>Ada 2</td>
+<td>0.890669</td>
+<td>0.317529</td>
+<td>0.395526</td>
+<td>0.762900</td>
+<td><strong>0.393265</strong></td>
+</tr>
+<tr class="odd">
+<td>Ada 3*</td>
+<td>0.879501</td>
+<td>0.407328</td>
+<td>0.432329</td>
+<td>0.754521</td>
+<td>0.383991</td>
+</tr>
+</tbody>
+</table>
+<p>*Previously selected as best model</p>
+</section>
+</section>
+</section>
+<section id="section-3-model-comparison" class="level3">
+<h3 class="anchored" data-anchor-id="section-3-model-comparison">Section 3: Model Comparison</h3>
+<p>All three SVM models performed well across the various performance metrics when compared to all previous models, as seen in Table 1. <code>DT3</code> had the highest recall, but was one of the worst performing models across all other metrics along with <code>DT Base</code>. All Decision Tree (<code>DTx</code>) and all Random Forest models (<code>RFx</code>) were generally outperformed by the SVM and AdaBosst models. While <code>SVM 2</code> stood out with the highest F1 score and competitive scores for all other metrics, it was edged out to <code>Ada 1</code> for AUC and Accuracy and <code>Ada 2</code> for AUPRC. However, the three SVM models performed better than the AdaBoost models for Recall with scores ranging from 0.478 to 0.577 vs 0.305 to 0.407.</p>
+<p>If we were to follow the examples from the literature, we should put greater emphasis on F1 score, AUC, and AUPRC. If this is the case, our best model may lie between <code>SVM 2</code>, <code>Ada 1</code> and <code>Ada 2</code>. However, given that the goal of our analysis is to predict if a client will subscribe to bank term deposit, we could prioritize Recall, as every additional “yes” outcome translates to an additional client subscription leading to profits for the bank, while misidentifying a “no” outcome has a comparatively low cost. Our performance metrics thus suggest that <code>SVM 1</code> may have a fairly high success rate for predicting positive outcome. Finally, though <code>SVM 2</code> may slightly under-predict positive outcomes, it may produce predictions that better balance costs and benefits.</p>
+</section>
+<section id="conclusion" class="level3">
+<h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
+<p>The result of the tests suggest that model <code>SVM 1</code> may be our strongest model to generate the highest “yes” recall value while generally performing well across other metrics. However, model <code>SVM 2</code> should not be discounted as it produces the most balanced “yes” and “no”, predictions leading to better balance between profits from clients that will sign up and the cost of targeting those that won’t. While the results of these SVM models is encouraging, other factors may need to be explored before putting either of these models into production. For example, our literature review suggested that SVM models may be relatively slow to train, potentially increasing our computing costs, a factor that is of particular importance if we need to retrain our model frequently. Additionally, SVMs are not as interpretable as other types of models, a factor that could make it difficult to garner the same level of organizational buy-in as a simpler model. Finally, a greater understanding of this domain may be needed to ensure we are selecting an appropriate model.</p>
+</section>
+<section id="references" class="level3">
+<h3 class="anchored" data-anchor-id="references">References</h3>
+<p>Ahmad, Amir, Safi, Ourooj, Malebary, Sharaf, Alesawi, Sami, Alkayal, Entisar, Decision Tree Ensembles to Predict Coronavirus Disease 2019 Infection: A Comparative Study, Complexity, 2021, 5550344, 8 pages, 2021. https://onlinelibrary.wiley.com/doi/10.1155/2021/5550344</p>
+<p>Azhar Ali, S.E, Rizvi, S. S. H., F. Lai, F., Faizan Ali, R., and A. Ali Jan Predicting (2021) Delinquency on Mortgage Loans: An Exhaustive Parametric Comparison of Machine Learning Techniques International. Journal of Industrial Engineering and Management, 12 (1), 1. https://www.ijiemjournal.uns.ac.rs/images/journal/volume12/IJIEM_272.pdf</p>
+<p>Chen, S., Guo, Z. and X. Zhao (2021). Predicting Mortgage Early Deliquency with Machine Learning Methods. European Journal of Operational Research, 290(1), 358. https://www.sciencedirect.com/science/article/abs/pii/S0377221720306846</p>
+<p>Doko, F., Kalajdziski, S., &amp; Mishkovski, I. (2021). Credit risk model based on Central Bank Credit Registry data. Journal of Risk and Financial Management, 14(3), 138. https://www.mdpi.com/1911-8074/14/3/138</p>
+<p>Guhathakurata S, Kundu S, Chakraborty A, Banerjee JS. A novel approach to predict COVID-19 using support vector machine. Data Science for COVID-19. 2021:351–64. doi: 10.1016/B978-0-12-824536-1.00014-9. Epub 2021 May 21. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8137961/">MCID: PMC813796P</a></p>
+<p>Krasovytskyi, D. adn A. Stavyskyy (2024). Predicting Mortgage Loan Defaults Using Machine Learning Techniques. Predicting Mortgage Loan Defaults Using Machine Learning Techniques. Ekonomika, 103(2). https://www.journals.vu.lt/ekonomika/article/download/34809/34141</p>
+<section id="additional-sources" class="level4">
+<h4 class="anchored" data-anchor-id="additional-sources">Additional Sources</h4>
+<p>Bastos, J. A. (2022). Predicting Credit Scores with Boosted Decision Trees. Forecasting, 4(4), 925-935. https://doi.org/10.3390/forecast4040050</p>
+<p>Liyanage, C. R., Mago, V., Schiff, R., Ranta, K., Park, A., Lovato-Day, K., Agnor, E., &amp; Gokani, R. (2023). Understanding Why Many People Experiencing Homelessness Reported Migrating to a Small Canadian City: Machine Learning Approach With Augmented Data. JMIR formative research, 7, e43511. https://pmc.ncbi.nlm.nih.gov/articles/PMC10189624/</p>
+<p>Showkat, D., Smith, A. D. R., Wang, L., and A. To. (2023, April). “Who is the right holmess client?”: Values in ALgorithmic Homelessness Service Provision and Machine Learning Reasearch [Conference presentation]. 2023 ACM Conference on Human Factors in Computing Systems (CHI). Hamburg, Germany. https://www.researchgate.net/publication/370131660_Who_is_the_right_homeless_client_Values_in_Algorithmic_Homelessness_Service_Provision_and_Machine_Learning_Research</p>
+<p>Tabar, M., Park, H., Winkler, S., Lee. D., Barman-Adhikari, A. and A. Yadav, (2020, August 23-27). Identifying Homeless Youth At-Risk of Substance Use Disorder: Data-Driven Insights for Policymakers [Conference presentation]. KDD’20 Virtual Event. USA. https://pike.psu.edu/publications/kdd20-homeless.pdf</p>
+<p>Tan, Jialu ()Using machine learning to identify populations at high risk for eviction as an indicator of homelessness [Masters Thesis, Massachusetts Institute of Technology]. https://dspace.mit.edu/handle/1721.1/127660</p>
+</section>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
