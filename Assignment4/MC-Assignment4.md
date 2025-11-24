@@ -39,3 +39,14 @@ Percent dropped out (if enrolled not counted):
 
 #### Grouping
 The following section groups similar categories together to assist with dimensionality reduction.
+
+
+## 3. Model Training
+### DT
+Max depth = 7
+
+### RF
+n_estimator converges on 400 for both `gini` and `entropy` for 10-Fold Cross Validation
+use RandomSearch to tune `max_depth`, `sample_split`, `samples_leaf`, `max_features`
+
+### XGBoost
