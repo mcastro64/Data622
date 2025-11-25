@@ -29,6 +29,9 @@ Our dataset has no missing (N/A) values. However, 180 of 4424 (~4%) observations
 A handful of rows (11 total) had credited > approved, but it seems questionable that you can get credit w.out passing class. Likely data entry error.
 
 18% of our observations are marked as in "enrolled", which is the student's current state. Keeping this class might make it harder to find the signals for dropout as students my drop out later. Therfore we will drop it, even as that means shrinking our dataset. We should watch out for curse of dimensionality and may need to apply Dimensionality reduction techniques.
+
+Reduced some correlation but still see highly correlated variables among "curriculum". Trees don’t care about correlated features but some SVM and NN
+
 Our data shows some imbalance. Ratio is closer if we do not count enrolled.
 
 Graduate   2129       50.31
@@ -36,6 +39,7 @@ Dropout    1338       31.62
 Enrolled    765       18.08
 Percent dropped out (if enrolled not counted):
 38.59244303432362
+
 
 #### Grouping
 The following section groups similar categories together to assist with dimensionality reduction.
