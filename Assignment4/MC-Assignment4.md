@@ -2,6 +2,7 @@ MC - Assignment #4
  
 ## 0. Introduction and Methodology
 
+
 Describe the problem you are trying to solve.
 Describe your dataset and what you did to prepare the data for analysis. 
 Methodologies you used for analyzing the data
@@ -20,30 +21,28 @@ What are the factors that contribute to dropouts?
 
 [Kaggle](https://www.kaggle.com/datasets/thedevastator/higher-education-predictors-of-student-retention/data)
 
-The dataset is comprised of 4424 samples with 16 numerical variables, 18 categorical variables including our dependent variable `target`. Each sample represents a unique student record for one year (2 semesters) of college participation with an outcome (Dropout, Graduate and Enrolled) assigned to `target`. The supporting variables cover topics such as student's personal profile (i.e. marital status, gender, age, debt), their school profile (i.e. enrollment type, major), academic achievement over two semesters (i.e. number of courses attempted and completed), parent's educational level and occupation, and local economic conditions (i.e. unemployment, inflation rate, and GPD)
+The dataset is comprised of 4424 samples with 16 numerical variables, 18 categorical variables including our dependent variable `target`. Each sample represents a unique student record for one year (2 semesters) of college participation with an outcome (Dropout, Graduate and Enrolled) assigned to `target`. The supporting variables cover topics such as student's personal profile (i.e. marital status, gender, age, debt), their school profile (i.e. enrollment type, major), academic achievement over two semesters (i.e. number of courses attempted and passed), parent's educational level and occupation, and local economic conditions (i.e. unemployment, inflation rate, and GPD).
 
-The dataset has no missing (N/A) values. However, 180 observations (~4%) had a value of 0 in all twelve academic achievement fields. These records had mixed outcomes in the `target` field where some were enrolled and others were graduates or dropouts; therefore, 0 appears to be a substitute for a missing value, as it appears  
+The dataset has no missing (N/A) values. However, 180 observations (~4%) had a value of 0 in all twelve fields for academic achievements in the last two semesters. These fields should include information about the number of courses attempted, passed, and credits awarded per semester, as well the corresponding number of tests and grades. Figure 1 shows the boxplots for our continous variables demonstrating that students that dropout are more likely to have received lower grades and passed fewer courses than those that graduated or those still enrolled.  The records in question had mixed outcomes in the `target` field, where some were enrolled and others were graduates or dropouts making it difficult to identify a particular pattern for why this value was used. This suggests that 0 could be a stand-in for a missing value possibly from previous imputation, that the dataset was synthetically generated, or that these records could be representative of edge cases (ie students that completed/were enrolled in coursework in a previous year but whose outcome status was not updated until the year of observation), as it seems highly unlikely that a student could be a graduate without taking at least one course. Given the connection between low grades and failed courses with dropouts and that we have no way of verifying these records, I opted to drop them over performing imputation as to avoid introducing noise into our model. 
 
-I will drop since this indicates that the student was not in school during the period of interest and records could just add noise to our models.
+More significantly, 18% of our observations were categorized as in "enrolled" indicating that the student has yet to have a final outcome (graduated vs dropped out). Keeping this class might make it harder to find the signals for dropouts and graduates as there is no guarantee that a currently active and enrolled student will indeed gradutate; conversely, students currently enrolled may dropout in subsequent semesters. Although 18% is not an insignificant number of observations to omit, keeping these records would also add additional noise to our model. We are finally left with the following number of observations:
 
-A handful of rows (11 total) had credited > approved, but it seems questionable that you can get credit w.out passing class. Likely data entry error.
+|----------|------|-------|
+| Graduate | 2129 | 50.31 |
+| Dropout  | 1338 | 38.59 |
 
-18% of our observations are marked as in "enrolled", which is the student's current state. Keeping this class might make it harder to find the signals for dropout as students my drop out later. Therfore we will drop it, even as that means shrinking our dataset. We should watch out for curse of dimensionality and may need to apply Dimensionality reduction techniques.
+Our boxplots also show that the IQRs for `unemployment_rate` and `application_order` are practically identical for the Dropout and Graduate classes, suggesting that these variables may not add much information to our models. I omited these two variables from my model so as to help reduce the overall dimensions used by my models and improve training efficiency. 
 
-Reduced some correlation but still see highly correlated variables among "curriculum". Trees don’t care about correlated features but some SVM and NN
+Examining our categorical variables show other areas where we may be able to bin categories to reduce dimensions created by One-Hot encoding. In particular, `application_mode`, `previous_qualifications`, mother and father's "qualification" and "occopation" fields, and `nationality` all have multiple categories of few observations (less than 5%) that can be grouped together to keep the number of dimensions from growing too high.
 
-Our data shows some imbalance. Ratio is closer if we do not count enrolled.
+Testing for Pearson Correlation Coefficient and Variance Inflation Factor (VIF) shows high correlation between 1st and 2nd semester academic achievement fields as seen in Table 1 and Table 2. I created new engineered variables combining some of these fields to help minimize correlation and as a dimension reduction method. The fields created were:
 
-Graduate   2129       50.31
-Dropout    1338       31.62
-Enrolled    765       18.08
-Percent dropped out (if enrolled not counted):
-38.59244303432362
+* `total_enrolled` : the sum of `curricular_units_1st_sem_enrolled` and `curricular_units_2nd_sem_enrolled` represeing the total number of courses that the student was enrolled in during the school year;
+* `total_credited`: the sum of `curricular_units_1st_sem_credited` and `curricular_units_2nd_sem_credited` representing the total number of credits received during the school year;
+* `total_approved`: the sum of `curricular_units_1st_sem_approved` and `curricular_units_2nd_sem_approved` representing the total classes passed during the school year;
+* `total_evaluations`: the sum of `curricular_units_1st_sem_evaluations` and `curricular_units_2nd_sem_evaluations` representing the total number of courses with tests during the school year;
 
-
-#### Grouping
-The following section groups similar categories together to assist with dimensionality reduction.
-
+Finally, I also created an engineered field for the students weighted average grade (`weighted_avg_grade`) and ommited the `curricular_units_[]num_sem_without_evaluations` fields as these fields are complimentary to the `curricular_units_[num]_sem_evaluations` fields and thus contain reduntant information.
 
 ## 3. Model Training
 ### DT
