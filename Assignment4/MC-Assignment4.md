@@ -4,7 +4,7 @@ MC - Assignment #4
 
 Studies suggest that roughly 40 percent of students started but did not graduate higher education (). High dropout rates can have a negative impact both for the individual and businesses. Many individuals who dropout leave with debt. According the Federal Reserve, 28 percent of people who received some but never completed college education had student debt ([federalreserve.gov, 2025](https://www.federalreserve.gov/publications/2025-economic-well-being-of-us-households-in-2024-higher-education-and-student-loans.htm?utm_source=chatgpt.com)). Additionally, depending on the particular field, a college degree can serve as a proxy for revelant job skills and used to screen the applicant pool. A 2022 study by the Burning Glass Institute and Harvard Business School found that 37% of middle skilled jobs still require a college. This puts these individuals at a potential economic disadvantage, as some may find that they don't meet the expected qualifications in certain job markets while also having to worry about paying back their debt. This can make it difficult to find their way back to school or to gain upward mobility. While some employers are experimenting resetting/lowering their degree requirements ([Burning Glass Institute, 2022](https://static1.squarespace.com/static/6197797102be715f55c0e0a1/t/6202bda7f1ceee7b0e9b7e2f/1644346798760/The+Emerging+Degree+Reset+%2822.02%29Final.pdf)), those that still have degree requirements risk turning away highly skilled candidates that could restrict the growth potential of the business and its broader sector. 
 
-This study aims to better identify factors that contribute to student dropouts. This information could be used to provide interventions for students at risk of dropping out such as recruiting these students into shorter skill-based programs designed to meet business demands in an effort to boost the economic outcomes for students and businesses alike. I will use a dataset from [Kaggle](https://www.kaggle.com/datasets/thedevastator/higher-education-predictors-of-student-retention/data) to analyze 34 variables covering topics such as student's personal profile (i.e. marital status, gender, age, debt), their school profile (i.e. enrollment type, major), academic achievement over two semesters (i.e. number of courses attempted and passed), parent's educational level and occupation, and local economic conditions (i.e. unemployment, inflation rate, and GPD). Using the Machine Learning algorithms Random Forest, XGBoost, Support Vector Machines and Neural Networks,  I will train evaluate models with the intent of identifying the strongest predictive model. The selected models will be used to ultimately answer: _what are the factors that contribute to dropouts?_
+This study aims to better identify factors that contribute to student dropouts. This information could be used to provide interventions for students at risk of dropping out such as recruiting these students into shorter skill-based programs designed to meet business demands in an effort to boost the economic outcomes for students and businesses alike. I will use a dataset from [Kaggle](https://www.kaggle.com/datasets/thedevastator/higher-education-predictors-of-student-retention/data) to analyze 34 variables covering topics such as student's personal profile (i.e. marital status, gender, age, debt), their school profile (i.e. enrollment type, major), academic achievement over two semesters (i.e. number of courses attempted and passed), parent's educational level and occupation, and local economic conditions (i.e. unemployment, inflation rate, and GPD). Using the Machine Learning algorithms Decision Trees, XGBoost and Neural Networks,  I will train evaluate models with the intent of identifying the strongest predictive model. The selected models will be used to ultimately answer: _what are the factors that contribute to dropouts?_
 
 ## 1. EDA and Data Engineering
 
@@ -29,38 +29,31 @@ Testing for Pearson Correlation Coefficient and Variance Inflation Factor (VIF) 
 
 Finally, I also created an engineered field for the students weighted average grade (`weighted_avg_grade`) and ommited the `curricular_units_[]num_sem_without_evaluations` fields as these fields are complimentary to the `curricular_units_[num]_sem_evaluations` fields and thus contain reduntant information.
 
-## 3. Model Training
-### DT
-Max depth = 7
+## 3.  Model Selection
 
-### RF
-n_estimator converges on 400 for both `gini` and `entropy` for 10-Fold Cross Validation
-use RandomSearch to tune `max_depth`, `sample_split`, `samples_leaf`, `max_features`
+I used three different Machine Learning techniques to evaluate their predictive performance for Accuracy, Precision, Recall, F1 Score, AUC, AUPRC across 6 models, as shown on Table 1. While all 6 metrics were of importance, Accuracy was less important than Recall for my analysis, given that our goal is to capture the highest number of at-risk students F1 Score is also important as a high F1 Score it is the harmonic will balances precision and recall, ensuring that we prioritize both. 
 
-### XGBoost
+I trained a Decision Tree with a max depth of 5 as my baseline model due to the high interpretability of Decision Trees. Although this performed decently in Accuracy and Precision, Decision Trees are also highly prone to high variance and overfitting since small changes in the training data can produce different splits. 
 
-### SVM
-With and without smote
-### Neural Networks
+I proceeded by experiment with XGBoost, an ensemble learning method that builds many shallow trees sequentially to adjust errors resulting in a more accurate and efficient model with slightly higher bias but much lower variance than a single tree, thus preventing overfitting. After training an initial model using random hyperparameters (XG0), I manually tested different values for `max_depth`, `min_child_weight`, `gamma`, `n_estimators`, and `learning_rate` with 5-fold CV to create model `xg1`. I them proceeded to use Random Search to perform some hyperparemeter tuning using 10-fold Cross-Validation (CV) and applied the best results to `XG2`. All three models performed similarly with XG0 outperfoming models on Recal
 
-## 4. Model Evalution
+For my final set of experiments, I trained Neural Networks (NN) models. A neural network is a machine learning model that learns patterns from data by passing information through layers of connected nodes. I tested Neural Networks with 1 and 2 hidden layers and compared different input and output dimensions. 
 
 Table 1: Comparison of Performance Metrics Across All Models
-| Model            | Accuracy   | Precision    | Recall       | F1         | AUC          | AUPRC       |
-|------------------|------------|--------------|--------------|------------|--------------|-------------|
-| Decision Tree    | 0.877522   | 0.892704     | 0.776119     | 0.830339   | 0.878210     | 0.858240    |
-| RF0              | 0.902017   | 0.938596     | 0.798507     | 0.862903   | 0.940776     | 0.940898    |
-| RF1              | 0.903458   | 0.938865     | 0.802239     | 0.865191   | **0.943531** | 0.942258    |
-| XG0              | 0.914986   | 0.940928     | 0.832090     | 0.883168   | 0.941656     | 0.943156    |
-| XG1              | 0.909222   | 0.936170     | 0.820896     | 0.874751   | 0.943066     | 0.943740    |
-| XG2              | 0.909222   | 0.936170     | 0.820896     | 0.874751   | 0.943066     | 0.943740    |
-| SVM0             | 0.904899   | 0.942982     | 0.802239     | 0.866935   | 0.941656     | 0.941852    |
-| SVMlinear        | 0.907781   | **0.943478** | 0.809701     | 0.871486   | 0.935661     | 0.938823    |
-| SVMlin w.SMOTE   | 0.891931   | 0.887550     | 0.824627     | 0.854932   | 0.932240     | 0.935464    |
-| SVM_RBF          | 0.900576   | 0.919831     | 0.813433     | 0.863366   | 0.938122     | 0.939636    |
-| SVM_RBF w.SMOTE  | 0.894813   | 0.904564     | 0.813433     | 0.856582   | 0.938126     | 0.938646    |
-| NN1              | 0.906340   | 0.907631     | **0.843284** | 0.874275   | 0.936322     | 0.940285    |
-| NN5              | **0.916427** | 0.937500   | 0.839552   | **0.885827** | 0.939642     | **0.943420** |
+
+| Model   | Accuracy |     Prec |   Recall |       F1 |      AUC |    AUPRC |
+|:--------|---------:|---------:|---------:|---------:|---------:|---------:|
+| DTree   | 0.880747 | **0.951456** | 0.728625 | 0.825263 | 0.892428 | 0.87016  |
+| XG0     | 0.905172 | 0.931915 | **0.814126** | 0.869048 | 0.932589 | 0.936413 |
+| XG1     | 0.903736 | 0.93913  | 0.802974 | 0.865731 | 0.938457 | 0.939775 |
+| XG2     | 0.905172 | 0.939394 | 0.806691 | 0.868    | 0.938379 | 0.938942 |
+| NN1     | 0.905172 | 0.935622 | 0.810409 | 0.868526 | **0.940599** | 0.940281 |
+| NN2     | **0.906609** | 0.935897 | **0.814126** | **0.870775** | 0.939911 | **0.940774** |
+
+
+
+Based on the table below, NN2 is our best performing model for Recall, F1 Score, AUC, and AUPRC, and performed relatively well for Precision and Accuracy. Given the nature of our study, NN2 
+
 
 ## Conclusion
 Make your conclusions from your analysis. Please be sure to address the business impact (it could be of any domain) of your solution.
